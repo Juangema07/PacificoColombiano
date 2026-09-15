@@ -1,51 +1,16 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const progress=$('#progress');addEventListener('scroll',()=>{if(progress){const h=document.documentElement.scrollHeight-innerHeight;progress.style.width=(h?scrollY/h*100:0)+'%'}},{passive:true});
+const observer=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.1});$$('.reveal').forEach(x=>observer.observe(x));
+const menu=$('#menuBtn'),nav=$('#mainNav');menu?.addEventListener('click',()=>nav.style.display=nav.style.display==='flex'?'none':'flex');nav?.querySelectorAll('a').forEach(a=>a.onclick=()=>{if(innerWidth<901)nav.style.display='none'});
+const parallax=$$('.hero-bg,.culture-bg,.challenge-bg,.finale-bg');addEventListener('scroll',()=>parallax.forEach((x,i)=>x.style.transform=`translateY(${scrollY*(i?-.018:-.035)}px) scale(1.05)`),{passive:true});
 
-/* ===== Animaciones generales ===== */
-const progress=$('#progress');
-addEventListener('scroll',()=>{if(progress){const h=document.documentElement.scrollHeight-innerHeight;progress.style.width=(h?scrollY/h*100:0)+'%'}},{passive:true});
-const observer=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.1});
-$$('.reveal').forEach(x=>observer.observe(x));
-const menu=$('#menuBtn'),nav=$('#mainNav');
-menu?.addEventListener('click',()=>nav.style.display=nav.style.display==='flex'?'none':'flex');
-nav?.querySelectorAll('a').forEach(a=>a.onclick=()=>{if(innerWidth<901)nav.style.display='none'});
-const parallax=$$('.hero-bg,.culture-bg,.challenge-bg,.finale-bg');
-addEventListener('scroll',()=>parallax.forEach((x,i)=>x.style.transform=`translateY(${scrollY*(i?-.018:-.035)}px) scale(1.05)`),{passive:true});
-
-/* ===== Selector visual de departamentos ===== */
-const locationData={
-  choco:{name:'Chocó',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Nuqui,%20Choc%C3%B3,%20Colombia.jpg',credit:'Foto: Dwayne Reilander · Wikimedia Commons · CC BY-SA 4.0'},
-  valle:{name:'Valle del Cauca',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Buenaventura,%20Colombia.jpg',credit:'Foto: Roboting · Wikimedia Commons · CC BY-SA 4.0'},
-  cauca:{name:'Cauca',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Guapi,%20Cauca,%20un%20destino%20en%20busca%20de%20un%20puerto.jpg',credit:'Foto: Angeles2023 · Wikimedia Commons · CC BY-SA 4.0'},
-  narino:{name:'Nariño',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/TumacoBeach.jpg',credit:'Foto: Daniel Rosasssss · Wikimedia Commons · CC BY-SA 4.0'}
-};
-const photo=$('.schematic-photo');
-const caption=photo?.parentElement?.querySelector('.schematic-caption span');
-const locationLabels={choco:'.schematic-label.l1',valle:'.schematic-label.l2',cauca:'.schematic-label.l3',narino:'.schematic-label.l4'};
-function selectLocation(key){
-  const item=locationData[key];
-  if(!item||!photo)return;
-  photo.classList.remove('location-change');
-  void photo.offsetWidth;
-  photo.style.backgroundImage=`linear-gradient(180deg,rgba(3,18,23,.02) 20%,rgba(3,18,23,.72) 100%),url("${item.image}")`;
-  photo.classList.add('location-change');
-  photo.dataset.location=key;
-  if(caption)caption.textContent=`${item.name} · ${item.credit}`;
-  Object.entries(locationLabels).forEach(([k,selector])=>$(selector)?.classList.toggle('active',k===key));
-}
-const locationStyle=document.createElement('style');
-locationStyle.textContent=`
-.schematic-photo{background-size:cover;background-position:center;transition:background-image .25s ease,transform .35s ease,filter .35s ease;overflow:hidden}
-.schematic-photo.location-change{animation:locationPulse .45s ease}
-@keyframes locationPulse{0%{opacity:.65;transform:scale(1.025)}100%{opacity:1;transform:scale(1)}}
-.schematic-label{cursor:pointer;transition:transform .2s ease,background .2s ease,border-color .2s ease;z-index:4}
-.schematic-label:hover,.schematic-label.active{transform:translateY(-2px) scale(1.05);background:rgba(91,230,190,.24);border-color:rgba(139,255,218,.7);box-shadow:0 8px 22px rgba(0,0,0,.22)}
-.schematic-caption span{display:block;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-`;
-document.head.appendChild(locationStyle);
+const locationData={choco:{name:'Chocó',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Nuqui,%20Choc%C3%B3,%20Colombia.jpg',credit:'Foto: Dwayne Reilander · Wikimedia Commons · CC BY-SA 4.0'},valle:{name:'Valle del Cauca',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Buenaventura,%20Colombia.jpg',credit:'Foto: Roboting · Wikimedia Commons · CC BY-SA 4.0'},cauca:{name:'Cauca',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/Guapi,%20Cauca,%20un%20destino%20en%20busca%20de%20un%20puerto.jpg',credit:'Foto: Angeles2023 · Wikimedia Commons · CC BY-SA 4.0'},narino:{name:'Nariño',image:'https://commons.wikimedia.org/wiki/Special:Redirect/file/TumacoBeach.jpg',credit:'Foto: Daniel Rosasssss · Wikimedia Commons · CC BY-SA 4.0'}};
+const photo=$('.schematic-photo'),caption=photo?.parentElement?.querySelector('.schematic-caption span');const locationLabels={choco:'.schematic-label.l1',valle:'.schematic-label.l2',cauca:'.schematic-label.l3',narino:'.schematic-label.l4'};
+function selectLocation(key){const item=locationData[key];if(!item||!photo)return;photo.classList.remove('location-change');void photo.offsetWidth;photo.style.backgroundImage=`linear-gradient(180deg,rgba(3,18,23,.02) 20%,rgba(3,18,23,.72) 100%),url("${item.image}")`;photo.classList.add('location-change');photo.dataset.location=key;if(caption)caption.textContent=`${item.name} · ${item.credit}`;Object.entries(locationLabels).forEach(([k,selector])=>$(selector)?.classList.toggle('active',k===key))}
+const locationStyle=document.createElement('style');locationStyle.textContent=`.schematic-photo{background-size:cover;background-position:center;transition:background-image .25s ease,transform .35s ease,filter .35s ease;overflow:hidden}.schematic-photo.location-change{animation:locationPulse .45s ease}@keyframes locationPulse{0%{opacity:.65;transform:scale(1.025)}100%{opacity:1;transform:scale(1)}}.schematic-label{cursor:pointer;transition:transform .2s ease,background .2s ease,border-color .2s ease;z-index:4}.schematic-label:hover,.schematic-label.active{transform:translateY(-2px) scale(1.05);background:rgba(91,230,190,.24);border-color:rgba(139,255,218,.7);box-shadow:0 8px 22px rgba(0,0,0,.22)}.schematic-caption span{display:block;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}`;document.head.appendChild(locationStyle);
 Object.entries(locationLabels).forEach(([key,selector])=>{const el=$(selector);if(!el)return;el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('aria-label',`Mostrar imagen real de ${locationData[key].name}`);el.addEventListener('click',()=>selectLocation(key));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectLocation(key)}})});
 
-/* ===== Información ampliada ===== */
 const data={
 choco:['Chocó','El litoral chocoano combina selva húmeda tropical, ríos, manglares, playas, estuarios y serranías. El Parque Nacional Natural Utría se encuentra en este departamento y protege una combinación especialmente diversa de ambientes marino-costeros. La costa chocoana también es un corredor para especies migratorias como la yubarta y varias tortugas marinas.'],
 valle:['Valle del Cauca','El Pacífico del Valle del Cauca tiene como principal referente costero a Buenaventura. El territorio reúne manglares, esteros, playas, selva y ambientes marinos, y cuenta con áreas protegidas como Uramba Bahía Málaga. La actividad portuaria de Buenaventura es un componente importante de la conectividad económica del litoral.'],
@@ -81,57 +46,30 @@ gorgona:['Parque Nacional Natural Gorgona','Gorgona pertenece al departamento de
 malaga:['Uramba Bahía Málaga','Uramba Bahía Málaga se encuentra en el litoral del Valle del Cauca y protege ambientes marino-costeros, manglares, esteros y playas. Es también un territorio donde comunidades locales participan en actividades productivas y de conservación. Las ballenas jorobadas llegan a sus aguas durante la temporada migratoria.'],
 'manglares-sur':['Cabo Manglares','Cabo Manglares se ubica en el extremo sur del Pacífico nariñense. Su paisaje está marcado por manglares, esteros, playas y una gran dinámica de agua. Es un territorio importante para biodiversidad y para comunidades cuya vida cotidiana depende de los recursos costeros.'],
 deforestacion:['Deforestación','La pérdida de bosque reduce hábitats, altera ciclos del agua y puede afectar suelos y actividades que dependen de la selva. En el Pacífico el análisis debe considerar causas diferentes según el territorio, así como las acciones de conservación y restauración que realizan comunidades e instituciones.'],
-'mineria':['Minería ilegal','La extracción no autorizada puede generar alteraciones en ríos, sedimentos y cobertura vegetal. También puede afectar actividades como pesca y agricultura. El análisis responsable debe distinguir entre minería formal, minería artesanal y explotación ilegal y revisar datos específicos del territorio estudiado.'],
+mineria:['Minería ilegal','La extracción no autorizada puede generar alteraciones en ríos, sedimentos y cobertura vegetal. También puede afectar actividades como pesca y agricultura. El análisis responsable debe distinguir entre minería formal, minería artesanal y explotación ilegal y revisar datos específicos del territorio estudiado.'],
 desigualdad:['Desigualdad y acceso','Los indicadores regionales muestran brechas en servicios, conectividad, educación, salud, vivienda e ingresos. Estas diferencias no son iguales en los cuatro departamentos, por lo que conviene estudiar los datos por departamento y por zonas urbanas y rurales en lugar de tratar al Pacífico como un territorio uniforme.'],
 presion:['Presión sobre ecosistemas','Los ecosistemas costeros y terrestres reciben presiones relacionadas con contaminación, extracción de recursos, cambios de uso del suelo, sobreexplotación y cambio climático. La conservación requiere combinar ciencia, educación ambiental, gestión pública y conocimiento de las comunidades.']
 };
-const modal=$('#modal'),title=$('#modalTitle'),body=$('#modalBody');
-function openInfo(k){const d=data[k];if(!d)return;if(title)title.textContent=d[0];if(body)body.innerHTML=`<p>${d[1]}</p><p><b>Para investigar:</b> identifica el lugar, el ecosistema o la actividad mencionada y contrasta el dato con una fuente institucional.</p>`;modal?.classList.add('show');modal?.setAttribute('aria-hidden','false')}
-$$('[data-info]').forEach(x=>x.addEventListener('click',()=>{if(locationData[x.dataset.info])selectLocation(x.dataset.info);openInfo(x.dataset.info)}));
-$('#modalClose')?.addEventListener('click',()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true')});
-modal?.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}});
-addEventListener('keydown',e=>{if(e.key==='Escape'){modal?.classList.remove('show');modal?.setAttribute('aria-hidden','true')}});
-selectLocation('choco');
+const modal=$('#modal'),title=$('#modalTitle'),body=$('#modalBody');function openInfo(k){const d=data[k];if(!d)return;if(title)title.textContent=d[0];if(body)body.innerHTML=`<p>${d[1]}</p><p><b>Para investigar:</b> identifica el lugar, el ecosistema o la actividad mencionada y contrasta el dato con una fuente institucional.</p>`;modal?.classList.add('show');modal?.setAttribute('aria-hidden','false')}
+$$('[data-info]').forEach(x=>x.addEventListener('click',()=>{if(locationData[x.dataset.info])selectLocation(x.dataset.info);openInfo(x.dataset.info)}));$('#modalClose')?.addEventListener('click',()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true')});modal?.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}});addEventListener('keydown',e=>{if(e.key==='Escape'){modal?.classList.remove('show');modal?.setAttribute('aria-hidden','true')}});selectLocation('choco');
 
-/* ===== Ambiente sonoro ===== */
-let audio=null,master=null,amb=false;
-function audioStart(){
-  if(!audio){audio=new (window.AudioContext||window.webkitAudioContext)();master=audio.createGain();master.gain.value=.001;master.connect(audio.destination);const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=82;g.gain.value=.11;o.connect(g).connect(master);o.start();const l=audio.createOscillator(),lg=audio.createGain();l.frequency.value=.08;lg.gain.value=25;l.connect(lg).connect(o.frequency);l.start()}
-  if(audio.state==='suspended')audio.resume();amb=!amb;master.gain.setTargetAtTime(amb?.05:.001,audio.currentTime,.25);if($('#soundBtn'))$('#soundBtn').textContent=amb?'◉ Ambiente activo':'◉ Activar ambiente'
-}
-$('#soundBtn')?.addEventListener('click',audioStart);
-$('#marimbaBtn')?.addEventListener('click',()=>{if(!audio)audioStart();const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23];notes.forEach((f,i)=>setTimeout(()=>{const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,audio.currentTime);g.gain.exponentialRampToValueAtTime(.09,audio.currentTime+.025);g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.5);o.connect(g).connect(master);o.start();o.stop(audio.currentTime+.55)},i*230))});
+let audio=null,master=null,amb=false;function audioStart(){if(!audio){audio=new (window.AudioContext||window.webkitAudioContext)();master=audio.createGain();master.gain.value=.001;master.connect(audio.destination);const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=82;g.gain.value=.11;o.connect(g).connect(master);o.start();const l=audio.createOscillator(),lg=audio.createGain();l.frequency.value=.08;lg.gain.value=25;l.connect(lg).connect(o.frequency);l.start()}if(audio.state==='suspended')audio.resume();amb=!amb;master.gain.setTargetAtTime(amb?.05:.001,audio.currentTime,.25);if($('#soundBtn'))$('#soundBtn').textContent=amb?'◉ Ambiente activo':'◉ Activar ambiente'}$('#soundBtn')?.addEventListener('click',audioStart);$('#marimbaBtn')?.addEventListener('click',()=>{if(!audio)audioStart();const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23];notes.forEach((f,i)=>setTimeout(()=>{const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,audio.currentTime);g.gain.exponentialRampToValueAtTime(.09,audio.currentTime+.025);g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.5);o.connect(g).connect(master);o.start();o.stop(audio.currentTime+.55)},i*230))});
 
-/* ===== Pestañas de juegos ===== */
 $$('.game-tabs button').forEach(b=>b.onclick=()=>{$$('.game-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.game-panel').forEach(x=>x.classList.remove('active'));$('#game'+b.dataset.game[0].toUpperCase()+b.dataset.game.slice(1))?.classList.add('active')});
-
-/* ===== Quiz: solo contenido del Pacífico ===== */
 const qs=[
-['¿Qué cuatro departamentos forman la agrupación Pacífica usada por el DANE?',['Cauca, Chocó, Nariño y Valle del Cauca','Chocó, Cauca, Nariño y Valle del Cauca','Valle del Cauca, Cauca, Chocó y Nariño','Nariño, Chocó, Valle del Cauca y Cauca'],0],
-['¿Cuál de estos ríos pertenece al territorio del Pacífico?',['Atrato','San Juan','Baudó','Mira'],0],
-['¿Qué instrumento es fundamental en las músicas tradicionales del Pacífico Sur?',['Marimba de chonta','Cununo','Bombo','Guasá'],0],
+['¿Qué cuatro departamentos forman la agrupación Pacífica usada por el DANE?',['Cauca, Chocó, Nariño y Valle del Cauca','Cauca, Chocó y Nariño','Chocó, Nariño y Valle del Cauca','Cauca, Nariño y Valle del Cauca'],0],
+['¿Cuál de estos ríos es destacado en el Pacífico colombiano?',['Atrato','San Juan','Baudó','Mira'],0],
+['¿Qué instrumento da nombre a una de las principales tradiciones musicales del Pacífico Sur?',['Marimba de chonta','Cununo','Bombo','Guasá'],0],
 ['¿Qué ecosistema se encuentra en el Parque Nacional Natural Gorgona?',['Arrecifes coralinos','Manglares','Selva húmeda tropical','Todos los anteriores'],3],
-['¿En qué época suele llegar la yubarta a las aguas cálidas del Pacífico colombiano?',['Entre julio y noviembre','Entre enero y marzo','Durante todo el año sin migración','Solo durante diciembre'],0],
+['¿En qué época suele llegar la yubarta a las aguas cálidas del Pacífico colombiano?',['Entre julio y noviembre','Entre agosto y octubre','Entre junio y septiembre','Entre septiembre y diciembre'],0],
 ['¿Cuál de estos lugares está en Chocó?',['Parque Nacional Natural Utría','Nuquí','Bahía Solano','Todos los anteriores'],3],
 ['¿Qué actividad está directamente relacionada con los esteros y el mar?',['Pesca','Navegación local','Recolección de piangua','Todas las anteriores'],3],
 ['¿Qué práctica ayuda a investigar responsablemente el Pacífico?',['Contrastar fuentes institucionales','Registrar la fecha de los datos','Relacionar el dato con un lugar concreto','Todas las anteriores'],3],
 ['¿Qué caracteriza a los manglares del Pacífico?',['Son ecosistemas de transición entre tierra y mar','Sirven como refugio y crianza para organismos','Están vinculados con pesca y recolección','Todas las anteriores'],3],
 ['¿Qué expresión pertenece al patrimonio musical del Pacífico Sur?',['Currulao','Arrullo','Alabao','Todas las anteriores'],3]
 ];
-let qi=0,score=0,answered=false;const qText=$('#qText'),qOptions=$('#qOptions'),qFeedback=$('#qFeedback'),next=$('#nextQ');
-function resetQuiz(){qi=0;score=0;if(next){next.textContent='Siguiente →';next.classList.add('hidden');next.onclick=advanceQuiz}renderQ()}
-function renderQ(){const q=qs[qi];answered=false;if($('#qCount'))$('#qCount').textContent=`Pregunta ${qi+1} / ${qs.length}`;if($('#qScore'))$('#qScore').textContent=`Puntos: ${score}`;if($('#qBar'))$('#qBar').style.width=`${(qi+1)/qs.length*100}%`;if(qText)qText.textContent=q[0];if(qOptions)qOptions.innerHTML='';if(qFeedback)qFeedback.textContent='';next?.classList.add('hidden');q[1].forEach((o,i)=>{const b=document.createElement('button');b.className='option';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;qOptions.querySelectorAll('button').forEach((x,j)=>{x.disabled=true;if(j===q[2])x.classList.add('correct');if(j===i&&i!==q[2])x.classList.add('wrong')});if(i===q[2]){score++;qFeedback.textContent='✓ Correcto. Este dato pertenece al territorio del Pacífico.'}else qFeedback.textContent='✦ Revisa la respuesta correcta y vuelve a explorar la sección relacionada.';if($('#qScore'))$('#qScore').textContent=`Puntos: ${score}`;next?.classList.remove('hidden')};qOptions?.appendChild(b)})}
-function advanceQuiz(){if(qi<qs.length-1){qi++;renderQ()}else{if(qText)qText.textContent=`Resultado: ${score} / ${qs.length}`;if(qOptions)qOptions.innerHTML='';if(qFeedback)qFeedback.textContent=score>=7?'¡Recorrido completado!':'Buen comienzo: vuelve a explorar el contenido del Pacífico y prueba otra vez.';next.textContent='Repetir';next.classList.remove('hidden');next.onclick=resetQuiz}}
-next?.addEventListener('click',advanceQuiz);
-renderQ();
+let qi=0,score=0,answered=false;const qText=$('#qText'),qOptions=$('#qOptions'),qFeedback=$('#qFeedback'),next=$('#nextQ');function resetQuiz(){qi=0;score=0;if(next){next.textContent='Siguiente →';next.classList.add('hidden');next.onclick=advanceQuiz}renderQ()}function renderQ(){const q=qs[qi];answered=false;if($('#qCount'))$('#qCount').textContent=`Pregunta ${qi+1} / ${qs.length}`;if($('#qScore'))$('#qScore').textContent=`Puntos: ${score}`;if($('#qBar'))$('#qBar').style.width=`${(qi+1)/qs.length*100}%`;if(qText)qText.textContent=q[0];if(qOptions)qOptions.innerHTML='';if(qFeedback)qFeedback.textContent='';next?.classList.add('hidden');q[1].forEach((o,i)=>{const b=document.createElement('button');b.className='option';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;qOptions.querySelectorAll('button').forEach((x,j)=>{x.disabled=true;if(j===q[2])x.classList.add('correct');if(j===i&&i!==q[2])x.classList.add('wrong')});if(i===q[2]){score++;qFeedback.textContent='✓ Correcto. Este dato pertenece al territorio del Pacífico.'}else qFeedback.textContent='✦ Revisa la respuesta correcta y vuelve a explorar la sección relacionada.';if($('#qScore'))$('#qScore').textContent=`Puntos: ${score}`;next?.classList.remove('hidden')};qOptions?.appendChild(b)})}function advanceQuiz(){if(qi<qs.length-1){qi++;renderQ()}else{if(qText)qText.textContent=`Resultado: ${score} / ${qs.length}`;if(qOptions)qOptions.innerHTML='';if(qFeedback)qFeedback.textContent=score>=7?'¡Recorrido completado!':'Buen comienzo: vuelve a explorar el contenido del Pacífico y prueba otra vez.';next.textContent='Repetir';next.classList.remove('hidden');next.onclick=resetQuiz}}next?.addEventListener('click',advanceQuiz);renderQ();
 
-/* ===== Memoria ===== */
-const symbols=['🐋','🌿','🎶','🌊','🐋','🌿','🎶','🌊'];let first=null,lock=false,found=0,moves=0;
-function memory(){const board=$('#memoryBoard');if(!board)return;board.innerHTML='';first=null;lock=false;found=0;moves=0;if($('#memoryMoves'))$('#memoryMoves').textContent='Movimientos: 0';symbols.slice().sort(()=>Math.random()-.5).forEach(s=>{const b=document.createElement('button');b.className='memory-card';b.textContent='?';b.dataset.symbol=s;b.onclick=()=>{if(lock||b===first||b.classList.contains('flipped'))return;b.classList.add('flipped');b.textContent=s;if(!first){first=b;return}moves++;if($('#memoryMoves'))$('#memoryMoves').textContent=`Movimientos: ${moves}`;if(first.dataset.symbol===b.dataset.symbol){found+=2;first=null;if(found===symbols.length&&$('#memoryMoves'))$('#memoryMoves').textContent=`¡Completado en ${moves} movimientos!`}else{lock=true;setTimeout(()=>{first?.classList.remove('flipped');if(first)first.textContent='?';b.classList.remove('flipped');b.textContent='?';first=null;lock=false},650)}};board.appendChild(b)})}
-$('#memoryReset')?.addEventListener('click',memory);memory();
-
-/* ===== Ruta del río ===== */
-let rs=0;const steps=[['¿Dónde nace el río?','⛰️ En zonas altas o nacientes'],['¿Por dónde continúa?','🌿 Por su cauce y ecosistemas ribereños'],['¿Qué conecta?','🏘️ Comunidades y territorios'],['¿Dónde termina?','🌊 En su desembocadura']];
-function river(){const box=$('#riverChoices');if(!box)return;box.innerHTML='';if(rs===steps.length){if($('#riverResult'))$('#riverResult').textContent='✓ Ruta completada. Has seguido el agua desde su nacimiento hasta el mar.';return}if($('#riverResult'))$('#riverResult').textContent=steps[rs][0];const opts=[steps[rs][1],'🌊 Un estero conectado con el sistema hídrico','🌿 Un manglar relacionado con el cauce'];opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='river-choice';b.textContent=o;b.onclick=()=>{if(o===steps[rs][1]){rs++;river()}else if($('#riverResult'))$('#riverResult').textContent='✦ Piensa en el recorrido natural del agua y vuelve a elegir.'};box.appendChild(b)})}
-river();
+const symbols=['🐋','🌿','🎶','🌊','🐋','🌿','🎶','🌊'];let first=null,lock=false,found=0,moves=0;function memory(){const board=$('#memoryBoard');if(!board)return;board.innerHTML='';first=null;lock=false;found=0;moves=0;if($('#memoryMoves'))$('#memoryMoves').textContent='Movimientos: 0';symbols.slice().sort(()=>Math.random()-.5).forEach(s=>{const b=document.createElement('button');b.className='memory-card';b.textContent='?';b.dataset.symbol=s;b.onclick=()=>{if(lock||b===first||b.classList.contains('flipped'))return;b.classList.add('flipped');b.textContent=s;if(!first){first=b;return}moves++;if($('#memoryMoves'))$('#memoryMoves').textContent=`Movimientos: ${moves}`;if(first.dataset.symbol===b.dataset.symbol){found+=2;first=null;if(found===symbols.length&&$('#memoryMoves'))$('#memoryMoves').textContent=`¡Completado en ${moves} movimientos!`}else{lock=true;setTimeout(()=>{first?.classList.remove('flipped');if(first)first.textContent='?';b.classList.remove('flipped');b.textContent='?';first=null;lock=false},650)}};board.appendChild(b)})}$('#memoryReset')?.addEventListener('click',memory);memory();
+let rs=0;const steps=[['¿Dónde nace el río?','⛰️ En zonas altas o nacientes'],['¿Por dónde continúa?','🌿 Por su cauce y ecosistemas ribereños'],['¿Qué conecta?','🏘️ Comunidades y territorios'],['¿Dónde termina?','🌊 En su desembocadura']];function river(){const box=$('#riverChoices');if(!box)return;box.innerHTML='';if(rs===steps.length){if($('#riverResult'))$('#riverResult').textContent='✓ Ruta completada. Has seguido el agua desde su nacimiento hasta el mar.';return}if($('#riverResult'))$('#riverResult').textContent=steps[rs][0];const opts=[steps[rs][1],'🌊 Un estero conectado con el sistema hídrico','🌿 Un manglar relacionado con el cauce'];opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='river-choice';b.textContent=o;b.onclick=()=>{if(o===steps[rs][1]){rs++;river()}else if($('#riverResult'))$('#riverResult').textContent='✦ Piensa en el recorrido natural del agua y vuelve a elegir.'};box.appendChild(b)})}river();
 })();
