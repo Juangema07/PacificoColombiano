@@ -1,102 +1,28 @@
-// Pacífico Colombiano — interacción educativa
-(function(){
-  'use strict';
-
-  // Limpia referencias internas que solo sirven para documentación de la construcción.
-  document.addEventListener('DOMContentLoaded',()=>{
-    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-    const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-    nodes.forEach(n=>{n.nodeValue=n.nodeValue.replace(/(?:cite|filecite)[^]+/g,'')});
-  });
-
-  const progress=document.getElementById('progress');
-  window.addEventListener('scroll',()=>{
-    const h=document.documentElement.scrollHeight-innerHeight;
-    progress.style.width=(h>0?(scrollY/h)*100:0)+'%';
-  },{passive:true});
-
-  const observer=new IntersectionObserver(entries=>entries.forEach(e=>{
-    if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}
-  }),{threshold:.12});
-  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-
-  const menuBtn=document.getElementById('menuBtn'),nav=document.getElementById('mainNav');
-  menuBtn?.addEventListener('click',()=>{nav.style.display=nav.style.display==='flex'?'none':'flex'});
-  nav?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(innerWidth<901)nav.style.display='none'}));
-
-  // Parallax ligero para las fotografías principales.
-  const parallaxEls=document.querySelectorAll('.hero-bg,.culture-bg,.challenge-bg,.finale-bg');
-  window.addEventListener('scroll',()=>{
-    const y=scrollY;
-    parallaxEls.forEach((el,i)=>{const factor=i===0?.055:.025;el.style.transform=`translateY(${y*factor}px) scale(1.06)`});
-  },{passive:true});
-
-  // Paisaje sonoro sintético, sin archivos externos.
-  let audioCtx=null, ambience=false, master=null;
-  function startAmbience(){
-    if(!audioCtx){
-      audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-      master=audioCtx.createGain();master.gain.value=.035;master.connect(audioCtx.destination);
-      const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sine';osc.frequency.value=92;gain.gain.value=.15;osc.connect(gain).connect(master);osc.start();
-      const lfo=audioCtx.createOscillator(),lg=audioCtx.createGain();lfo.frequency.value=.08;lg.gain.value=35;lfo.connect(lg);lg.connect(osc.frequency);lfo.start();
-    }
-    if(audioCtx.state==='suspended')audioCtx.resume();
-    ambience=!ambience;master.gain.setTargetAtTime(ambience?.055:.001,audioCtx.currentTime,.25);
-  }
-  document.getElementById('soundBtn')?.addEventListener('click',startAmbience);
-  document.getElementById('marimbaBtn')?.addEventListener('click',()=>{
-    if(!audioCtx)startAmbience();
-    if(!audioCtx)return;
-    const notes=[261.63,329.63,392,523.25,392,329.63];
-    notes.forEach((f,i)=>setTimeout(()=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.09,audioCtx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.55);o.connect(g).connect(master);o.start();o.stop(audioCtx.currentTime+.6)},i*260));
-  });
-
-  // Retos / problemáticas.
-  const modal=document.getElementById('modal'),close=document.getElementById('modalClose'),mt=document.getElementById('modalTitle'),mb=document.getElementById('modalBody');
-  const modalData={
-    deforestacion:{title:'Deforestación',body:'<p><b>¿Qué ocurre?</b> La pérdida de cobertura boscosa puede reducir hábitats y alterar suelos y agua.</p><p><b>Preguntas para investigar:</b></p><ul><li>¿Qué actividades generan presión sobre el bosque?</li><li>¿Cómo afecta a comunidades que dependen del territorio?</li><li>¿Qué alternativas de manejo sostenible existen?</li></ul>'},
-    mineria:{title:'Minería ilegal',body:'<p><b>¿Qué ocurre?</b> La extracción no autorizada puede producir impactos sobre ecosistemas y fuentes hídricas y relacionarse con conflictos territoriales.</p><p><b>Reto:</b> compara una fuente ambiental con una fuente social y construye una propuesta de prevención.</p>'},
-    desigualdad:{title:'Desigualdad y acceso',body:'<p>El proyecto pide observar pobreza, desigualdad, desplazamiento y acceso a educación y salud. En lugar de reducir el problema a una sola causa, investiga indicadores, diferencias territoriales y políticas públicas.</p><p><b>Reto:</b> diseña una solución digital que ayude a comunicar servicios y oportunidades disponibles.</p>'},
-    ecosistemas:{title:'Presión sobre ecosistemas',body:'<p>Los ecosistemas marino-costeros y terrestres pueden recibir presión por contaminación, cambio climático y sobreexplotación de recursos.</p><p><b>Reto:</b> elige un ecosistema y crea una cadena “presión → efecto → respuesta”.</p>'}
-  };
-  document.querySelectorAll('[data-modal]').forEach(b=>b.addEventListener('click',()=>{const d=modalData[b.dataset.modal];mt.textContent=d.title;mb.innerHTML=d.body;modal.classList.add('show');modal.setAttribute('aria-hidden','false')}));
-  function closeModal(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')};close?.addEventListener('click',closeModal);modal?.addEventListener('click',e=>{if(e.target===modal)closeModal()});
-
-  // Juegos.
-  document.querySelectorAll('.game-tabs button').forEach(btn=>btn.addEventListener('click',()=>{
-    document.querySelectorAll('.game-tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
-    document.querySelectorAll('.game-panel').forEach(x=>x.classList.remove('active'));
-    document.getElementById('game'+btn.dataset.game.charAt(0).toUpperCase()+btn.dataset.game.slice(1)).classList.add('active');
-  }));
-
-  const questions=[
-    {q:'¿Qué cuatro departamentos conforman la agrupación Pacífica usada por el DANE?',o:['Cauca, Chocó, Nariño y Valle del Cauca','Antioquia, Chocó, Cauca y Huila','Nariño, Tolima, Cauca y Meta','Chocó, Valle, Risaralda y Antioquia'],a:0,e:'El DANE agrupa la Región Pacífica con Cauca, Chocó, Nariño y Valle del Cauca.'},
-    {q:'¿Cuál de estos es un río destacado del Pacífico?',o:['Atrato','Bogotá','Guaviare','Cesar'],a:0,e:'El Atrato es uno de los grandes ríos de la región.'},
-    {q:'¿Qué instrumento está estrechamente relacionado con las músicas tradicionales del Pacífico Sur?',o:['Marimba de chonta','Arpa llanera','Acordeón vallenato','Bandola andina'],a:0,e:'La marimba de chonta es parte central de esta manifestación cultural.'},
-    {q:'¿Qué ecosistema aparece en áreas protegidas como Gorgona?',o:['Arrecifes coralinos','Desierto de dunas','Sabanas de la Orinoquía','Glaciares'],a:0,e:'Gorgona reúne, entre otros, arrecifes coralinos, selva, manglares y playas.'},
-    {q:'¿Qué animal migratorio llega a aguas cálidas del Pacífico colombiano?',o:['Ballena jorobada','Oso polar','Reno','Pingüino emperador'],a:0,e:'Las yubartas realizan una larga migración hacia estas aguas para reproducirse.'},
-    {q:'¿Qué parque nacional se ubica en Chocó y tiene selva, manglares y ambientes marinos?',o:['Utría','Tayrona','Sierra Nevada del Cocuy','El Tuparro'],a:0,e:'El PNN Utría está en Chocó y protege ecosistemas marino-costeros y terrestres.'},
-    {q:'¿Qué actividad pertenece al sector terciario?',o:['Turismo','Minería','Pesca','Agricultura'],a:0,e:'El turismo forma parte del sector de servicios.'},
-    {q:'¿Qué busca una investigación responsable según la guía del proyecto?',o:['Contrastar fuentes y verificar datos','Copiar una sola página','Evitar registrar fuentes','Usar datos sin fecha'],a:0,e:'La guía recomienda consultar, comparar y verificar fuentes.'}
-  ];
-  let qi=0,score=0,answered=false;const qText=document.getElementById('qText'),qOptions=document.getElementById('qOptions'),qFeedback=document.getElementById('qFeedback'),nextQ=document.getElementById('nextQ'),qCount=document.getElementById('qCount'),qScore=document.getElementById('qScore'),qBar=document.getElementById('qBar');
-  function renderQ(){
-    const x=questions[qi];answered=false;qCount.textContent=`Pregunta ${qi+1} / ${questions.length}`;qScore.textContent=`Puntos: ${score}`;qBar.style.width=`${((qi+1)/questions.length)*100}%`;qText.textContent=x.q;qFeedback.textContent='';nextQ.classList.add('hidden');qOptions.innerHTML='';
-    x.o.forEach((opt,i)=>{const b=document.createElement('button');b.className='option';b.textContent=opt;b.onclick=()=>answerQ(i,b);qOptions.appendChild(b)});
-  }
-  function answerQ(i,b){if(answered)return;answered=true;const x=questions[qi];qOptions.querySelectorAll('button').forEach((el,j)=>{if(j===x.a)el.classList.add('correct');if(j===i&&i!==x.a)el.classList.add('wrong');el.disabled=true});if(i===x.a){score++;qFeedback.textContent='✓ Correcto. '+x.e}else qFeedback.textContent='✦ Casi. '+x.e;qScore.textContent=`Puntos: ${score}`;nextQ.classList.remove('hidden');}
-  nextQ.onclick=()=>{if(qi<questions.length-1){qi++;renderQ()}else{qText.textContent=`Resultado: ${score} / ${questions.length}`;qOptions.innerHTML='';qFeedback.textContent=score>=6?'¡Excelente recorrido! Ya tienes una buena base para seguir investigando.':'Buen comienzo. Revisa las secciones y vuelve a intentarlo.';nextQ.textContent='Repetir';nextQ.classList.remove('hidden');nextQ.onclick=()=>{qi=0;score=0;nextQ.textContent='Siguiente →';nextQ.onclick=()=>{if(qi<questions.length-1){qi++;renderQ()}};renderQ()}}};
-  renderQ();
-
-  // Memoria.
-  const memorySymbols=['🐋','🌿','🎶','🌊','🐋','🌿','🎶','🌊'];let first=null,lock=false,moves=0,found=0;const board=document.getElementById('memoryBoard'),movesEl=document.getElementById('memoryMoves');
-  function shuffle(a){return a.sort(()=>Math.random()-.5)}
-  function buildMemory(){board.innerHTML='';first=null;lock=false;moves=0;found=0;movesEl.textContent='Movimientos: 0';shuffle([...memorySymbols]).forEach((s,i)=>{const b=document.createElement('button');b.className='memory-card';b.textContent='?';b.dataset.symbol=s;b.onclick=()=>flip(b);board.appendChild(b)})}
-  function flip(card){if(lock||card===first||card.classList.contains('flipped'))return;card.classList.add('flipped');card.textContent=card.dataset.symbol;if(!first){first=card;return}moves++;movesEl.textContent=`Movimientos: ${moves}`;if(first.dataset.symbol===card.dataset.symbol){found+=2;first=null;if(found===memorySymbols.length)setTimeout(()=>alert('¡Memoria completa! Has encontrado todos los símbolos del Pacífico.'),250)}else{lock=true;setTimeout(()=>{first.classList.remove('flipped');first.textContent='?';card.classList.remove('flipped');card.textContent='?';first=null;lock=false},650)}}
-  document.getElementById('memoryReset')?.addEventListener('click',buildMemory);buildMemory();
-
-  // Ruta del río.
-  const riverSteps=[{text:'¿Dónde nace el río?',ok:'⛰️ En zonas altas o nacientes'},{text:'¿Por dónde continúa?',ok:'🌿 Por su cauce y ecosistemas ribereños'},{text:'¿Qué conecta?',ok:'🏘️ Comunidades y territorios'},{text:'¿Dónde termina el recorrido?',ok:'🌊 En su desembocadura, hacia otro cuerpo de agua'}];let rs=0;const rc=document.getElementById('riverChoices'),rr=document.getElementById('riverResult');
-  function renderRiver(){rc.innerHTML='';if(rs===riverSteps.length){rr.textContent='✓ Ruta completada. Los ríos son sistemas naturales y también corredores de vida y conexión territorial.';return}rr.textContent='';riverSteps[rs].choices=[riverSteps[rs].ok,'🌵 Una zona desértica sin agua','🏜️ Un paisaje sin relación con el río'];riverSteps[rs].choices.sort(()=>Math.random()-.5).forEach(c=>{const b=document.createElement('button');b.className='river-choice';b.textContent=c;b.onclick=()=>{if(c===riverSteps[rs].ok){rs++;renderRiver()}else rr.textContent='✦ Observa la pregunta: piensa en el recorrido natural del agua.'};rc.appendChild(b)})}
-  renderRiver();
-})();
+(()=>{'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const clean=()=>{const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),a=[];while(w.nextNode())a.push(w.currentNode);a.forEach(n=>n.nodeValue=n.nodeValue.replace(/(?:cite|filecite)[^]+/g,''))};
+const progress=$('#progress');addEventListener('scroll',()=>{const h=document.documentElement.scrollHeight-innerHeight;progress.style.width=(h?scrollY/h*100:0)+'%'},{passive:true});
+const observer=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}}),{threshold:.1});$$('.reveal').forEach(x=>observer.observe(x));
+const menu=$('#menuBtn'),nav=$('#mainNav');menu?.addEventListener('click',()=>nav.style.display=nav.style.display==='flex'?'none':'flex');nav?.querySelectorAll('a').forEach(a=>a.onclick=()=>{if(innerWidth<901)nav.style.display='none'});
+const parallax=$$('.hero-bg,.culture-bg,.challenge-bg,.finale-bg');addEventListener('scroll',()=>parallax.forEach((x,i)=>x.style.transform=`translateY(${scrollY*(i?-.018:-.035)}px) scale(1.05)`),{passive:true});
+const data={
+choco:['Chocó','El litoral chocoano combina selvas húmedas, ríos, costa y serranías. Es una pieza importante para comprender la diversidad física y cultural del Pacífico.'],
+valle:['Valle del Cauca','El litoral del Valle tiene como referente a Buenaventura y conecta el Pacífico con importantes rutas marítimas y actividades portuarias.'],
+cauca:['Cauca','El litoral caucano incluye territorios como Guapi, Timbiquí y López de Micay, con una fuerte relación entre ríos, costa y comunidades.'],narino:['Nariño','El Pacífico nariñense incluye Tumaco y sectores costeros como Cabo Manglares, con manglares, estuarios y ambientes marinos.'],
+relieve:['Serranía del Baudó','El relieve del Pacífico incluye llanuras costeras y elevaciones. La serranía del Baudó es una forma destacada del Pacífico norte.'],
+rios:['Ríos que conectan','Atrato, San Juan, Baudó, Mira y Patía aparecen entre los ríos destacados. Los ríos son parte del paisaje y también corredores de movilidad y vida.'],
+clima:['Un mundo húmedo','El Pacífico colombiano se caracteriza por precipitaciones abundantes y alta humedad. El clima ayuda a explicar la presencia de bosques y otros ecosistemas húmedos.'],
+selva:['Selva húmeda','Los bosques tropicales forman hábitats para numerosas especies y están conectados con ríos y otros ecosistemas.'],manglar:['Manglares','Los manglares se encuentran en la transición entre tierra y mar y cumplen funciones ecológicas importantes en las zonas costeras.'],estuario:['Estuarios','Son espacios donde se relacionan aguas continentales y marinas. En ellos confluyen procesos ecológicos y dinámicas humanas.'],arrecife:['Arrecifes','Los arrecifes coralinos presentes en sectores del Pacífico insular ofrecen refugio y zonas de alimentación para organismos marinos.'],playa:['Playas','Las playas hacen parte del paisaje costero y pueden ser utilizadas por especies para reproducción o alimentación.'],
+yubarta:['Yubarta','Las ballenas jorobadas llegan a aguas del Pacífico colombiano durante su migración reproductiva. Son uno de los grandes espectáculos naturales de la costa.'],tortugas:['Tortugas marinas','Distintas especies utilizan las aguas y playas del Pacífico para alimentación, refugio o reproducción.'],aves:['Aves','La combinación de selva, manglares, ríos y costa genera una gran variedad de hábitats para aves.'],corales:['Arrecifes coralinos','En lugares como Gorgona existen arrecifes y ambientes marinos asociados a una alta diversidad de organismos.'],
+territorio:['Comunidades y territorio','Los ríos y el litoral influyen en movilidad, alimentación, trabajo y organización comunitaria. El territorio no es solo paisaje: también es espacio de vida.'],oralidad:['Tradición oral','Historias, cantos y saberes se transmiten entre generaciones. La oralidad ayuda a conservar memoria e identidad colectiva.'],diversidad:['Diversidad cultural','El Pacífico reúne una fuerte presencia afrocolombiana y pueblos indígenas, junto con conocimientos y expresiones culturales propias.'],
+currulao:['Currulao','El currulao es una de las expresiones musicales asociadas al Pacífico Sur y a la tradición de la marimba de chonta.'],arrullo:['Arrullo','El arrullo forma parte de las prácticas musicales y comunitarias tradicionales del Pacífico Sur.'],alabao:['Alabao','El alabao es una expresión vocal tradicional vinculada a la memoria y a prácticas comunitarias.'],juga:['Juga','La juga hace parte del repertorio tradicional de músicas y cantos del Pacífico Sur.'],
+agricultura:['Agricultura','La agricultura hace parte de las actividades económicas regionales y se relaciona con producción local y medios de vida.'],pesca:['Pesca','La pesca puede desarrollarse de manera artesanal y comercial y está directamente vinculada con el ambiente marino y los ríos.'],mineria:['Minería','La minería es una actividad económica presente en territorios del Pacífico y también aparece como tema de análisis por sus impactos ambientales cuando se realiza sin control.'],puertos:['Puertos','La actividad portuaria conecta el litoral con redes comerciales y de transporte. Buenaventura es un referente fundamental.'],turismo:['Turismo','El turismo de naturaleza y cultura puede aprovechar paisajes, áreas protegidas y patrimonio, siempre considerando la conservación y las comunidades.'],forestal:['Actividad forestal','Los recursos forestales tienen importancia económica y ambiental. Su aprovechamiento plantea la necesidad de considerar manejo y sostenibilidad.'],
+utria:['Parque Nacional Natural Utría','Utría protege selva, manglares, playas y ambientes marino-costeros en Chocó. Es además un lugar relacionado con el paso de especies migratorias.'],gorgona:['Parque Nacional Natural Gorgona','Gorgona reúne selva húmeda tropical, manglares, playas, litoral rocoso y arrecifes coralinos, con una importante diversidad terrestre y marina.'],malaga:['Uramba Bahía Málaga','Es un área protegida del Pacífico vinculada a ecosistemas marino-costeros y a comunidades locales.'],['manglares-sur']:['Cabo Manglares','Zona costera del extremo sur del Pacífico colombiano asociada a manglares, estuarios y biodiversidad.'],
+deforestacion:['Deforestación','Analiza causas, consecuencias, población afectada y respuestas. La pérdida de cobertura vegetal puede afectar biodiversidad, suelos, agua y formas de vida relacionadas con el bosque.'],mineria:['Minería ilegal','La extracción no autorizada puede generar impactos sobre ecosistemas y fuentes hídricas y relacionarse con conflictos territoriales. Un análisis escolar debe contrastar fuentes ambientales y sociales.'],desigualdad:['Desigualdad y acceso','El desafío incluye acceso a servicios, conectividad y oportunidades. Conviene observar diferencias territoriales y consultar indicadores antes de sacar conclusiones.'],presion:['Presión sobre ecosistemas','Contaminación, sobreexplotación y cambio climático pueden aumentar la presión sobre ecosistemas costeros y terrestres.'],};
+const modal=$('#modal'),title=$('#modalTitle'),body=$('#modalBody');function openInfo(k){const d=data[k];if(!d)return;title.textContent=d[0];body.innerHTML=`<p>${d[1]}</p><p><b>Para investigar:</b> compara fuentes, identifica un dato verificable y relaciónalo con el territorio.</p>`;modal.classList.add('show');modal.setAttribute('aria-hidden','false')}$$('[data-info]').forEach(x=>x.addEventListener('click',()=>openInfo(x.dataset.info)));$('#modalClose')?.addEventListener('click',()=>{modal.classList.remove('show');modal.setAttribute('aria-hidden','true')});modal?.addEventListener('click',e=>{if(e.target===modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true')}});addEventListener('keydown',e=>{if(e.key==='Escape'){modal?.classList.remove('show');modal?.setAttribute('aria-hidden','true')}});
+let audio=null,master=null,amb=false;function audioStart(){if(!audio){audio=new (window.AudioContext||window.webkitAudioContext)();master=audio.createGain();master.gain.value=.001;master.connect(audio.destination);const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=82;g.gain.value=.11;o.connect(g).connect(master);o.start();const l=audio.createOscillator(),lg=audio.createGain();l.frequency.value=.08;lg.gain.value=25;l.connect(lg).connect(o.frequency);l.start()}if(audio.state==='suspended')audio.resume();amb=!amb;master.gain.setTargetAtTime(amb?.05:.001,audio.currentTime,.25);$('#soundBtn').textContent=amb?'◉ Ambiente activo':'◉ Activar ambiente'}$('#soundBtn')?.addEventListener('click',audioStart);
+$('#marimbaBtn')?.addEventListener('click',()=>{if(!audio)audioStart();const notes=[261.63,329.63,392,523.25,392,329.63,293.66,349.23];notes.forEach((f,i)=>setTimeout(()=>{const o=audio.createOscillator(),g=audio.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,audio.currentTime);g.gain.exponentialRampToValueAtTime(.09,audio.currentTime+.025);g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+.5);o.connect(g).connect(master);o.start();o.stop(audio.currentTime+.55)},i*230))});
+$$('.game-tabs button').forEach(b=>b.onclick=()=>{$$('.game-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');$$('.game-panel').forEach(x=>x.classList.remove('active'));$('#game'+b.dataset.game[0].toUpperCase()+b.dataset.game.slice(1))?.classList.add('active')});
+const qs=[['¿Qué cuatro departamentos forman la agrupación Pacífica usada por el DANE?',['Cauca, Chocó, Nariño y Valle del Cauca','Antioquia, Chocó, Cauca y Huila','Nariño, Tolima, Cauca y Meta','Chocó, Valle, Risaralda y Antioquia'],0],['¿Cuál es un río destacado del Pacífico?',['Atrato','Bogotá','Guaviare','Cesar'],0],['¿Qué instrumento está relacionado con las músicas tradicionales del Pacífico Sur?',['Marimba de chonta','Arpa llanera','Acordeón vallenato','Bandola andina'],0],['¿Qué ecosistema aparece en Gorgona?',['Arrecifes coralinos','Desierto de dunas','Sabanas de la Orinoquía','Glaciares'],0],['¿Qué gran mamífero migratorio llega al Pacífico colombiano?',['Ballena jorobada','Oso polar','Reno','Pingüino emperador'],0],['¿Qué parque nacional está en Chocó?',['Utría','Tayrona','El Cocuy','El Tuparro'],0],['¿Qué actividad pertenece al sector de servicios?',['Turismo','Minería','Pesca','Agricultura'],0],['¿Qué debe hacer una investigación responsable?',['Contrastar y verificar fuentes','Copiar una sola página','Evitar registrar fuentes','Usar datos sin fecha'],0]];let qi=0,score=0,answered=false;const qText=$('#qText'),qOptions=$('#qOptions'),qFeedback=$('#qFeedback'),next=$('#nextQ');function renderQ(){const q=qs[qi];answered=false;$('#qCount').textContent=`Pregunta ${qi+1} / ${qs.length}`;$('#qScore').textContent=`Puntos: ${score}`;$('#qBar').style.width=`${(qi+1)/qs.length*100}%`;qText.textContent=q[0];qOptions.innerHTML='';qFeedback.textContent='';next.classList.add('hidden');q[1].forEach((o,i)=>{const b=document.createElement('button');b.className='option';b.textContent=o;b.onclick=()=>{if(answered)return;answered=true;qOptions.querySelectorAll('button').forEach((x,j)=>{x.disabled=true;if(j===q[2])x.classList.add('correct');if(j===i&&i!==q[2])x.classList.add('wrong')});if(i===q[2]){score++;qFeedback.textContent='✓ Correcto. Sigue explorando para conectar este dato con el territorio.'}else qFeedback.textContent='✦ Revisa la respuesta correcta y vuelve a intentarlo.';$('#qScore').textContent=`Puntos: ${score}`;next.classList.remove('hidden')};qOptions.appendChild(b)})}next.onclick=()=>{if(qi<qs.length-1){qi++;renderQ()}else{qText.textContent=`Resultado: ${score} / ${qs.length}`;qOptions.innerHTML='';qFeedback.textContent=score>=6?'¡Recorrido completado!':'Buen comienzo: vuelve a explorar las secciones y prueba otra vez.';next.textContent='Repetir';next.classList.remove('hidden');next.onclick=()=>{qi=0;score=0;next.textContent='Siguiente →';next.onclick=()=>{if(qi<qs.length-1){qi++;renderQ()}};renderQ()}}};renderQ();
+const symbols=['🐋','🌿','🎶','🌊','🐋','🌿','🎶','🌊'];let first=null,lock=false,found=0,moves=0;function memory(){const board=$('#memoryBoard');board.innerHTML='';first=null;lock=false;found=0;moves=0;$('#memoryMoves').textContent='Movimientos: 0';symbols.sort(()=>Math.random()-.5).forEach(s=>{const b=document.createElement('button');b.className='memory-card';b.textContent='?';b.dataset.symbol=s;b.onclick=()=>{if(lock||b===first||b.classList.contains('flipped'))return;b.classList.add('flipped');b.textContent=s;if(!first){first=b;return}moves++;$('#memoryMoves').textContent=`Movimientos: ${moves}`;if(first.dataset.symbol===b.dataset.symbol){found+=2;first=null;if(found===symbols.length)$('#memoryMoves').textContent=`¡Completado en ${moves} movimientos!`}else{lock=true;setTimeout(()=>{first.classList.remove('flipped');first.textContent='?';b.classList.remove('flipped');b.textContent='?';first=null;lock=false},650)}};board.appendChild(b)})}$('#memoryReset')?.addEventListener('click',memory);memory();
+let rs=0;const steps=[['¿Dónde nace el río?','⛰️ En zonas altas o nacientes'],['¿Por dónde continúa?','🌿 Por su cauce y ecosistemas ribereños'],['¿Qué conecta?','🏘️ Comunidades y territorios'],['¿Dónde termina?','🌊 En su desembocadura']];function river(){const box=$('#riverChoices');box.innerHTML='';if(rs===steps.length){$('#riverResult').textContent='✓ Ruta completada. Has seguido el agua desde su nacimiento hasta el mar.';return}$('#riverResult').textContent=steps[rs][0];const opts=[steps[rs][1],'🌵 Una zona sin relación con el río','🏜️ Un paisaje completamente seco'];opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='river-choice';b.textContent=o;b.onclick=()=>{if(o===steps[rs][1]){rs++;river()}else $('#riverResult').textContent='✦ Piensa en el recorrido natural del agua y vuelve a elegir.'};box.appendChild(b)})}river();clean();})();
