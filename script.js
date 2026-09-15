@@ -72,4 +72,46 @@ let qi=0,score=0,answered=false;const qText=$('#qText'),qOptions=$('#qOptions'),
 
 const symbols=['🐋','🌿','🎶','🌊','🐋','🌿','🎶','🌊'];let first=null,lock=false,found=0,moves=0;function memory(){const board=$('#memoryBoard');if(!board)return;board.innerHTML='';first=null;lock=false;found=0;moves=0;if($('#memoryMoves'))$('#memoryMoves').textContent='Movimientos: 0';symbols.slice().sort(()=>Math.random()-.5).forEach(s=>{const b=document.createElement('button');b.className='memory-card';b.textContent='?';b.dataset.symbol=s;b.onclick=()=>{if(lock||b===first||b.classList.contains('flipped'))return;b.classList.add('flipped');b.textContent=s;if(!first){first=b;return}moves++;if($('#memoryMoves'))$('#memoryMoves').textContent=`Movimientos: ${moves}`;if(first.dataset.symbol===b.dataset.symbol){found+=2;first=null;if(found===symbols.length&&$('#memoryMoves'))$('#memoryMoves').textContent=`¡Completado en ${moves} movimientos!`}else{lock=true;setTimeout(()=>{first?.classList.remove('flipped');if(first)first.textContent='?';b.classList.remove('flipped');b.textContent='?';first=null;lock=false},650)}};board.appendChild(b)})}$('#memoryReset')?.addEventListener('click',memory);memory();
 let rs=0;const steps=[['¿Dónde nace el río?','⛰️ En zonas altas o nacientes'],['¿Por dónde continúa?','🌿 Por su cauce y ecosistemas ribereños'],['¿Qué conecta?','🏘️ Comunidades y territorios'],['¿Dónde termina?','🌊 En su desembocadura']];function river(){const box=$('#riverChoices');if(!box)return;box.innerHTML='';if(rs===steps.length){if($('#riverResult'))$('#riverResult').textContent='✓ Ruta completada. Has seguido el agua desde su nacimiento hasta el mar.';return}if($('#riverResult'))$('#riverResult').textContent=steps[rs][0];const opts=[steps[rs][1],'🌊 Un estero conectado con el sistema hídrico','🌿 Un manglar relacionado con el cauce'];opts.sort(()=>Math.random()-.5).forEach(o=>{const b=document.createElement('button');b.className='river-choice';b.textContent=o;b.onclick=()=>{if(o===steps[rs][1]){rs++;river()}else if($('#riverResult'))$('#riverResult').textContent='✦ Piensa en el recorrido natural del agua y vuelve a elegir.'};box.appendChild(b)})}river();
+
+async function initPdfSlideshow(){
+  const viewer=document.querySelector('#pdfSlideshow');
+  if(!viewer)return;
+  const canvas=document.querySelector('#pdfCanvas');
+  const ctx=canvas?.getContext('2d');
+  const loading=document.querySelector('#pdfLoading');
+  const info=document.querySelector('#pdfPageInfo');
+  const prev=document.querySelector('#pdfPrev');
+  const next=document.querySelector('#pdfNext');
+  if(!canvas||!ctx)return;
+  try{
+    const pdfjs=await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.min.mjs');
+    pdfjs.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.4.149/pdf.worker.min.mjs';
+    const pdf=await pdfjs.getDocument('The_Pacific_Paradox.pdf').promise;
+    let pageNumber=1;
+    async function renderPage(){
+      if(loading)loading.hidden=false;
+      const page=await pdf.getPage(pageNumber);
+      const base=page.getViewport({scale:1});
+      const maxWidth=Math.min(viewer.clientWidth-36,1100);
+      const scale=Math.max(.5,Math.min(1.8,maxWidth/base.width));
+      const viewport=page.getViewport({scale});
+      canvas.width=Math.floor(viewport.width);
+      canvas.height=Math.floor(viewport.height);
+      await page.render({canvasContext:ctx,viewport}).promise;
+      if(info)info.textContent=`Diapositiva ${pageNumber} / ${pdf.numPages}`;
+      if(prev)prev.disabled=pageNumber<=1;
+      if(next)next.disabled=pageNumber>=pdf.numPages;
+      if(loading)loading.hidden=true;
+    }
+    prev?.addEventListener('click',()=>{if(pageNumber>1){pageNumber--;renderPage()}});
+    next?.addEventListener('click',()=>{if(pageNumber<pdf.numPages){pageNumber++;renderPage()}});
+    addEventListener('resize',()=>renderPage(),{passive:true});
+    addEventListener('keydown',e=>{if(e.key==='ArrowLeft'&&pageNumber>1){pageNumber--;renderPage()}if(e.key==='ArrowRight'&&pageNumber<pdf.numPages){pageNumber++;renderPage()}});
+    renderPage();
+  }catch(error){
+    if(loading){loading.hidden=false;loading.textContent='No se pudo cargar la presentación. Puedes descargar el PDF debajo.'}
+    console.error('PDF slideshow:',error);
+  }
+}
+initPdfSlideshow();
 })();
