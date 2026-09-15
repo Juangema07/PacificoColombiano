@@ -6,9 +6,8 @@ Experiencia web educativa e interactiva sobre la Región Pacífica de Colombia, 
 
 La interfaz usa una identidad visual propia basada en tres ideas: **selva, océano y memoria**. Predominan fotografías a pantalla completa, tarjetas de vidrio, navegación por secciones, parallax, microanimaciones y una paleta inspirada en agua y vegetación.
 
-## Contenido incluido
+## Contenido
 
-- Portada visual.
 - Ubicación y departamentos de la agrupación regional utilizada por DANE.
 - Geografía física: relieve, clima, hidrografía y ecosistemas.
 - Biodiversidad y especies representativas.
@@ -16,15 +15,17 @@ La interfaz usa una identidad visual propia basada en tres ideas: **selva, océa
 - Música de marimba y cantos tradicionales.
 - Geografía económica: agricultura, pesca, minería, puertos, turismo y sector forestal.
 - Lugares de interés y áreas protegidas: Utría, Gorgona, Uramba Bahía Málaga y Cabo Manglares.
-- Problemáticas y desafíos con módulos de reflexión.
-- Tres juegos originales: Quiz relámpago, Memoria del Pacífico y Ruta del río.
-- Espacios preparados para video, podcast, infografías y PowerPoint del grupo.
-- Sección “Para seguir explorando” con fuentes institucionales.
-- Bibliografía y nota de créditos para imágenes.
+- Problemáticas ambientales y sociales con módulos interactivos.
+- Tres juegos originales: Quiz, Memoria del Pacífico y Ruta del río.
+- **Podcast del grupo:** `AUD-20260915-WA0005.mp3`.
+- **Ambiente de lluvia/selva:** `empressnefertitimumbi-rainforest-208926.mp3`.
+- **Ambiente de océano:** `dragon-studio-gentle-ocean-waves-499666.mp3`.
+- **Presentación del grupo:** `The_Pacific_Paradox.pdf`.
+- Fuentes institucionales y académicas para ampliar la investigación.
 
-## Archivos
+## Archivos principales
 
-- `index.html` — estructura y contenido.
+- `index.html` — estructura, contenido, materiales y componentes interactivos.
 - `style.css` — diseño responsive, fondos fotográficos y animaciones.
 - `script.js` — navegación, parallax, audio sintético, modales y juegos.
 
@@ -38,14 +39,12 @@ La interfaz usa una identidad visual propia basada en tres ideas: **selva, océa
 - DIMAR / Centro de Investigaciones Oceanográficas e Hidrográficas del Pacífico — información marítima.
 - Servicio Geológico Colombiano — características geográficas y geológicas.
 
-## Pendientes del grupo
+## Presentación
 
-1. Reemplazar los marcadores de video, podcast, infografías y PowerPoint con los productos reales.
-2. Añadir los nombres de los integrantes, grado y área si la institución lo solicita dentro de la portada.
-3. Revisar las imágenes remotas y colocar créditos/licencias verificadas antes de la entrega.
-4. Revisar los datos con las fuentes originales y conservar las fechas de consulta.
-5. Añadir, si se desea, un mapa interactivo real como recurso complementario.
+Los archivos audiovisuales y la presentación están integrados directamente en la sección **Productos del grupo** de la página. Los audios requieren interacción del visitante para comenzar la reproducción.
+
+Las fotografías remotas se utilizan como apoyo visual. Antes de la entrega final conviene conservar sus créditos y verificar las condiciones de uso de cada recurso externo.
 
 ## Publicación
 
-Este repositorio está preparado para GitHub Pages. Si Pages está habilitado para el repositorio, la página puede publicarse desde la rama `main`.
+Este repositorio está preparado para GitHub Pages y utiliza la rama `main` para el despliegue.
