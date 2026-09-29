@@ -117,3 +117,24 @@ async function initPdfSlideshow(){
 }
 initPdfSlideshow();
 })();
+
+/* Fondo general: rotación de paisajes del Pacífico */
+const generalBackgrounds=[
+  'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1433086966358-54859d0ed716?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1473445361085-b9a07f55608b?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2400&q=85',
+  'https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=2400&q=85'
+];
+let generalBackgroundIndex=0;
+function rotateGeneralBackground(){
+  const url=generalBackgrounds[generalBackgroundIndex];
+  document.documentElement.style.setProperty('--site-background','url("' + url + '")');
+  generalBackgroundIndex=(generalBackgroundIndex+1)%generalBackgrounds.length;
+}
+generalBackgrounds.forEach(src=>{const img=new Image();img.src=src});
+rotateGeneralBackground();
+setInterval(rotateGeneralBackground,12000);
