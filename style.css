@@ -2,3 +2,9 @@
 /* VISIBILITY SAFETY: the page content must remain visible even if JavaScript fails to load. */
 .reveal{opacity:1;transform:none}
 .reveal.visible{opacity:1;transform:none}
+
+
+/* FONDO GENERAL MULTI-ESCENA */
+body{background:var(--deep)}
+body::before{content:'';position:fixed;inset:0;z-index:-10;pointer-events:none;background-image:linear-gradient(180deg,rgba(3,17,22,.82),rgba(3,17,22,.94)),var(--site-background,url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=85'));background-size:cover;background-position:center;background-repeat:no-repeat;transform:scale(1.04);filter:saturate(.82);transition:background-image 1.4s ease,opacity 1.4s ease}
+body::after{content:'';position:fixed;inset:0;z-index:-9;pointer-events:none;background:radial-gradient(circle at 20% 15%,rgba(57,199,212,.08),transparent 28%),radial-gradient(circle at 80% 75%,rgba(114,229,191,.06),transparent 30%)}
